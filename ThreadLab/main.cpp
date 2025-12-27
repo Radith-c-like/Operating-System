@@ -1,88 +1,54 @@
 ﻿#include <iostream>
-#include <vector>
-#include <thread>
 #include <chrono>
-#include <stdexcept>
+#include <random>
+#include "matrix_mult.h"
 
-using Matrix = std::vector<std::vector<double>>;
-
-// Функция для умножения части строк
-void multiplyPart(const Matrix& A, const Matrix& B, Matrix& C,
-    size_t rowStart, size_t rowEnd) {
-    size_t n = A[0].size();    // столбцы A = строки B
-    size_t m = B[0].size();    // столбцы B
-
-    for (size_t i = rowStart; i < rowEnd; ++i) {
-        for (size_t j = 0; j < m; ++j) {
-            double sum = 0;
-            for (size_t k = 0; k < n; ++k)
-                sum += A[i][k] * B[k][j];
-            C[i][j] = sum;
-        }
-    }
-}
-
-// Функция умножения матриц с использованием потоков
-Matrix multiplyParallel(const Matrix& A, const Matrix& B, unsigned int threadsCount) {
-    size_t n = A.size();
-    size_t m = B[0].size();
-    size_t k = B.size();
-
-    if (A[0].size() != k)
-        throw std::runtime_error("Matrix dimensions mismatch!");
-
-    Matrix C(n, std::vector<double>(m, 0));
-
-    // Разделяем строки по потокам
-    size_t rowsPerThread = (n + threadsCount - 1) / threadsCount;
-    std::vector<std::jthread> threads;
-
-    for (unsigned int t = 0; t < threadsCount; ++t) {
-        size_t rowStart = t * rowsPerThread;
-        if (rowStart >= n) break;
-        size_t rowEnd = std::min(rowStart + rowsPerThread, n);
-
-        threads.emplace_back(multiplyPart, std::cref(A), std::cref(B), std::ref(C), rowStart, rowEnd);
-    }
-
-    // std::jthread автоматически join-ится в деструкторе
-    return C;
+Matrix generateMatrix(size_t rows, size_t cols) {
+    Matrix res(rows, std::vector<double>(cols));
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(1.0, 2.0);
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; j < cols; ++j)
+            res[i][j] = dis(gen);
+    return res;
 }
 
 int main() {
     size_t n, m, p;
-    unsigned int threadsCount = std::thread::hardware_concurrency();
+    std::cout << "Enter matrix sizes (n m p): ";
+    if (!(std::cin >> n >> m >> p)) return 1;
 
-    std::cout << "Input Matrix sizes (A: n x m, B: m x p): ";
-    std::cin >> n >> m >> p;
+    Matrix A = generateMatrix(n, m);
+    Matrix B = generateMatrix(m, p);
 
-    Matrix A(n, std::vector<double>(m));
-    Matrix B(m, std::vector<double>(p));
+    unsigned int tRows = 4, tCols = 4;
+    std::cout << "\n--- Starting Benchmarks ---\n";
 
-    std::cout << "Input Matrix A (" << n << "x" << m << "):\n";
-    for (size_t i = 0; i < n; ++i)
-        for (size_t j = 0; j < m; ++j)
-            std::cin >> A[i][j];
-
-    std::cout << "Input Matrix B (" << m << "x" << p << "):\n";
-    for (size_t i = 0; i < m; ++i)
-        for (size_t j = 0; j < p; ++j)
-            std::cin >> B[i][j];
-
-    auto start = std::chrono::high_resolution_clock::now();
-    Matrix C = multiplyParallel(A, B, threadsCount);
-    auto end = std::chrono::high_resolution_clock::now();
-
-    std::cout << "\nResult (A * B):\n";
-    for (auto& row : C) {
-        for (double val : row)
-            std::cout << val << ' ';
-        std::cout << '\n';
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        Matrix C = multiplyParallel2D(A, B, tRows, tCols);
+        auto end = std::chrono::high_resolution_clock::now();
+        std::cout << "C++ Standard (jthread): " << std::chrono::duration<double>(end - start).count() << "s\n";
     }
 
-    std::chrono::duration<double> duration = end - start;
-    std::cout << "\nComputing time: " << duration.count() << " second.\n";
-    std::cout << "Threads are used: " << threadsCount << "\n";
+#ifdef _WIN32
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        Matrix C = multiplyParallelWinAPI(A, B, tRows, tCols);
+        auto end = std::chrono::high_resolution_clock::now();
+        std::cout << "Windows API:           " << std::chrono::duration<double>(end - start).count() << "s\n";
+    }
+#endif
+
+#ifdef __linux__
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        Matrix C = multiplyParallelPthread(A, B, tRows, tCols);
+        auto end = std::chrono::high_resolution_clock::now();
+        std::cout << "POSIX Threads (Linux): " << std::chrono::duration<double>(end - start).count() << "s\n";
+    }
+#endif
 
     return 0;
 }
