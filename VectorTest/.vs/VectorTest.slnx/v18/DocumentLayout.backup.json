@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\rodio\\source\\repos\\Number\\VectorTest\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{AEA3D33C-324A-41F9-BF20-2E50D905CFC6}|VectorTest\\VectorTest.vcxproj|C:\\Users\\rodio\\source\\repos\\Number\\VectorTest\\VectorTest\\VectorTest.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{AEA3D33C-324A-41F9-BF20-2E50D905CFC6}|VectorTest\\VectorTest.vcxproj|solutionrelative:VectorTest\\VectorTest.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "VectorTest.cpp",
+              "DocumentMoniker": "C:\\Users\\rodio\\source\\repos\\Number\\VectorTest\\VectorTest\\VectorTest.cpp",
+              "RelativeDocumentMoniker": "VectorTest\\VectorTest.cpp",
+              "ToolTip": "C:\\Users\\rodio\\source\\repos\\Number\\VectorTest\\VectorTest\\VectorTest.cpp",
+              "RelativeToolTip": "VectorTest\\VectorTest.cpp",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAMwBEAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-01-08T14:20:51.222Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
